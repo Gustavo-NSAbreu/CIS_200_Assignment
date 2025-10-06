@@ -1,0 +1,21 @@
+File: A2_Plants.txt 
+File Version F2025
+Creation Date  09/05/2025
+CIS200 Assignment 2  Fall 2025
+
+Fields on each line of this file: 
+	Each line has the following fields: Plant Name <comma>, Cost per Megawatt $, Max Production Capacity
+	Different plant types may have additional fields following the above on the same line.
+	The additional fields are described in the assignment document.
+
+&*****&
+Sand Dune, Solar 80 43.50            260   13.5
+Thumb Wind Farm, Wind  140 45.75     60    175    12.5
+Grand River Falls, Hydro 175  39.00  423.5  15.75
+Fermi-III, Nuclear 1050  85.15          45
+West Side Breeze, Wind  160 54.00     70    190    14.00
+Power Puff, GeoTherm  75  75.00
+Richmond-New, Gas  650 55.15  Natural 85
+RualG, Gas  75  45.00  Methane  65
+
+

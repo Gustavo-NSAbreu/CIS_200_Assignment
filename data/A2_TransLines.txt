@@ -1,0 +1,15 @@
+File: A2_TransLine.txt 
+File Version F2025
+Creation Date  09/03/2025
+CIS200 Assignment 2  Fall 2025
+
+Fields on each file line:  Line Number, Line Name, Line Capacity, Line Efficiency
+All fields are free form with specific delimiters.
+
+&*****&
+101 Copper    175 0.95
+143 Autoway Line  250 0.92
+206 Ironwood Spur   305 0.90
+209 Lakes East Loop  240 0.88
+231 Bluewater Conduit  190 0.85
+245 Copper2  340 0.82
