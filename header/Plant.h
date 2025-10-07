@@ -1,24 +1,20 @@
-#pragma once
+
+//******************************************************
 // File: Plant.h
-//
-// Contains class definition for the power Plant class
-//
-// Plants generate the electricity and supply it to demand location 
-// using transmission lines.
-//
-// Plants have varying characteriscs such as Fuel Type, Capacity, Age, 
-// cost to produce electricty, hours of operation, and environmental 
-// impact.
-//
-// Plants understand their total capacity and track how much power
-// has already been committed and the amount available to provide.
-// 
+// Author: Dheya Alrabeei and Gustavo Rameirez
+// Date:   October 6 2024
+// Description:
+//   Contains class definitions for PowerPlant and all
+//   derived types. Each plant type has unique attributes
+//   and calculates its own power output based on conditions.
+//******************************************************
 
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <cassert>
+#include <algorithm>
+#include "GridDef.h"
 using namespace std;
 
 
@@ -33,38 +29,46 @@ class PowerPlant {
 protected:
     string  plantName;
     string  type;
-    double  maxCapacity = 0.0;        // The absolute maximum capacity of the plant
-    double  curCapacity = 0.0;        // The current capacity of the plant based weather, rain,..
-    double  availCapacity = 0.0;      // The capacity that is avaiable for demand locations. (not already allocated)
-    double  costPerMW = 0.0;          // Average cost to produce including capital costs
-    
+    double  maxPowerOuput = 0.0;        // The absolute maximum capacity of the plant
+    double operatingCost = 0.0;    // Cost per megawatt ($)
+    double currentOutput = 0.0; // Current calculated output (MW)
+
 public:
     // Constructors & Destructors
-    PowerPlant(const string& name, const string& type, const double cost, const double maxCapacity);
-    //virtual ~Plant();                 // Virtual destructor
+   PowerPlant(const string& name, const string& type, double maxCapacity, double cost)
+    : plantName(name), type(type), maxCapacity(maxCapacity), operatingCost(cost), currentOutput(0.0) {}
 
-    // Mutators
-    void reduceCapacity(double amount);         // Reduce the available capacity for the plant when it is allocated to a location
-    double  getCapacityAllocated() const;       // Retruns capacity already allocated to areas
-    double  getCostOfAllocatedPower() const;    // returns cost of the power to allocated to areas
-    virtual double calculateOutput() = 0;       // Pure virtual function for calculating output today
-    virtual string getCurConditions() const { return "Normal";} // Returns string with current conditons at plant - Each type should override
+        
+    // Virtual destructor
+    virtual ~PowerPlant() = default;
 
-  
+    // Pure virtual function for output calculation
+    virtual double calculateOutput() = 0;
+
+    // Virtual function for current conditions
+    virtual string getCurCondition() const { return "Normal"; }
+
     // Getters and Setters
     string getPlantName() const { return plantName; }
     string getType() const { return type; }
-    double getMaxCapacity() const { return maxCapacity; }
-    double getCurCapacity() const { return curCapacity; }
-    double getAvailCapacity() const { return availCapacity; }
-    double getCostPerMW() const { return costPerMW; }
- 
-    
+    double getMaxPowerOutput() const { return maxPowerOutput; }
+    double getOperatingCost() const { return operatingCost; }
+    double getCurrentOutput() const { return currentOutput; }
 
-    // Print and debug 
-    virtual void printAll() const;          // Prints all the information for the plant
-
+     
+    // Prints all the information for the plant
+    virtual void printAll() const {
+        cout << "----------------------------------------\n";
+        cout << "Plant: " << plantName << " (" << type << ")\n";
+        cout << "Max Power Output: " << maxPowerOutput << " MW\n";
+        cout << "Operating Cost: $" << operatingCost << " per MW\n";
+        cout << "Current Output: " << currentOutput << " MW\n";
+        cout << "Current Conditions: " << getCurCondition() << endl;
+        cout << "----------------------------------------\n";
+    }
 };
+
+
 
 
 
@@ -74,16 +78,27 @@ public:
 //
 class SolarFarm : public PowerPlant {
 private:
-    double numAcres;        // Land size of solar farm in acres
-    double sunlightHours;   // Daily sunlight hours
+    double numAcres;
+    double sunlightHours;   // hours of sunlight today (dynamic)
 
 public:
-    // Constructors and Destructors
-    SolarFarm(const string& name, double maxCapacity, double costPerMW, double numAcres, double sunlightHours);
+    SolarFarm(const string& name, double maxOutput, double cost, double acres)
+        : PowerPlant(name, "Solar", maxOutput, cost), numAcres(acres), sunlightHours(6) {}
 
-    double calculateOutput() override;                  // Calculate output for this plant
-    virtual string getCurConditions() const override;   // Get current conditons at plant
+    // Dynamic sunlight affects output
+    double calculateOutput() override {
+        double factor = sunlightHours / 12.0; // normalize to 0–1
+        currentOutput = maxPowerOutput * factor;
+        return currentOutput;
+    }
+
+    string getCurCondition() const override {
+        return "Sunlight Hours: " + to_string(sunlightHours);
+    }
+
+    void setSunlightHours(double hours) { sunlightHours = hours; }
 };
+
 
 //******************************************************
 //                  WindFarm Plant                 *****
@@ -91,17 +106,26 @@ public:
 //******************************************************
 class WindFarm : public PowerPlant {
 private:
-    int     turbineCount;   // Number of turbines
-    double  bladeLen;       // Length of each blade (in feet)
-    double  avgWindSpeed;   // Average wind speed in miles/hrs
+    int turbineCount;
+    double avgWindSpeed;    // miles per hour
 
 public:
-    // Constructors and Destructors
-    WindFarm(string& name, double maxCapacity, double cost, int turbines, double bladeLen, double windSpeed);
+    WindFarm(const string& name, double maxOutput, double cost, int turbines)
+        : PowerPlant(name, "Wind", maxOutput, cost), turbineCount(turbines), avgWindSpeed(10) {}
 
-    double calculateOutput() override;          // Calculate output for this plant
-    string getCurConditions() const override;   // Get current conditons at plant
+    double calculateOutput() override {
+        double factor = min(avgWindSpeed / 25.0, 1.0); // cap at 1.0
+        currentOutput = maxPowerOutput * factor;
+        return currentOutput;
+    }
+
+    string getCurCondition() const override {
+        return "Average Wind Speed: " + to_string(avgWindSpeed) + " mph";
+    }
+
+    void setAvgWindSpeed(double speed) { avgWindSpeed = speed; }
 };
+
 
 
 
@@ -109,44 +133,73 @@ public:
 //                Hydro Electric Plant             *****
 //******************************************************
 class HydroPlant : public PowerPlant {
-    double  inFlowRate;         // Water inflow (cubic meters per second)
-    double  verticalDrop;       // Drop for water to drive the generators (meters)
+private:
+    double inFlowRate;   // cubic meters/sec
+    double verticalDrop; // meters
 
 public:
-    // Constructors and Destructors
-    HydroPlant(const string& name, double maxCapacity, double cost, double flowRate, double(drop));
+    HydroPlant(const string& name, double maxOutput, double cost,
+               double flowRate, double drop)
+        : PowerPlant(name, "Hydro", maxOutput, cost),
+          inFlowRate(flowRate), verticalDrop(drop) {}
 
-    double calculateOutput() override;              // Calculate output for this plant
-    string getCurConditions() const override;       // Get current conditons at plant
+    double calculateOutput() override {
+        // Simplified formula: power proportional to flow * drop
+        double factor = min((inFlowRate * verticalDrop) / 1000.0, 1.0);
+        currentOutput = maxPowerOutput * factor;
+        return currentOutput;
+    }
+
+    string getCurCondition() const override {
+        return "Flow: " + to_string(inFlowRate) + " m^3/s, Drop: " + to_string(verticalDrop) + " m";
+    }
+
+    void setFlowRate(double flow) { inFlowRate = flow; }
+    void setVerticalDrop(double drop) { verticalDrop = drop; }
 };
-
 
 //******************************************************
 //              Nuclear Electric Plant             *****
 //******************************************************
 class NuclearPlant : public PowerPlant {
-    int     fuelRodsActive;     // Number of fuel rods inserted in the reactor
+private:
+    int fuelRodsActive; // number of fuel rods
 
 public:
-    // Constructors and Destructors
-    NuclearPlant(const string& name, double maxCapacity, double cost, int fuelRodCount);
+    NuclearPlant(const string& name, double maxOutput, double cost, int rods)
+        : PowerPlant(name, "Nuclear", maxOutput, cost), fuelRodsActive(rods) {}
 
-    double calculateOutput() override;                  // Calculate output for this plant
-    virtual string getCurConditions() const override;   // Get current conditons at plant
+    double calculateOutput() override {
+        double factor = min(fuelRodsActive / 100.0, 1.0); // max 100 rods
+        currentOutput = maxPowerOutput * factor;
+        return currentOutput;
+    }
+
+    string getCurCondition() const override {
+        return "Fuel Rods Active: " + to_string(fuelRodsActive);
+    }
+
+    void setFuelRods(int rods) { fuelRodsActive = rods; }
 };
+
 
 //******************************************************
 //             Geothermal Electric Plant           *****
 //******************************************************
 class GeothermalPlant : public PowerPlant {
-    // No plant specific varaibles - at this time :-)
-
 public:
-    // Constructors and Destructors
-    GeothermalPlant(const string& name, double maxCapacity, double cost);
+    GeothermalPlant(const string& name, double maxOutput, double cost)
+        : PowerPlant(name, "Geothermal", maxOutput, cost) {}
 
-    double calculateOutput() override;                  // Calculate output for this plant
-    virtual string getCurConditions() const override;   // Get current conditons at plant
+    double calculateOutput() override {
+        // Stable output, just use max
+        currentOutput = maxPowerOutput;
+        return currentOutput;
+    }
+
+    string getCurCondition() const override {
+        return "Stable geothermal output";
+    }
 };
 
 
@@ -155,15 +208,27 @@ public:
 // Plants using gas for fuel - natural, LP, Bio... *****
 //******************************************************
 class GasPlant : public PowerPlant {
-    string      fuelType;           // Type of fuel (coal, naturalgas, ...)
-    double      throttlePercent;    // Percent opening of throttle (0.0 - 100.0)
+private:
+    string fuelType;
+    double throttlePercent; // 0–100
 
 public:
-    // Constructors and Destructors
-    GasPlant(const string& name, double capacity, double cost, const string& fuel, double throttlePer);
+    GasPlant(const string& name, double maxOutput, double cost, const string& fuel, double throttle)
+        : PowerPlant(name, "Gas", maxOutput, cost),
+          fuelType(fuel), throttlePercent(throttle) {}
 
-    double calculateOutput() override;                  // Calculate output for this plant
-    virtual string getCurConditions() const override;   // Get current conditons at plant
+    double calculateOutput() override {
+        double factor = throttlePercent / 100.0;
+        currentOutput = maxPowerOutput * factor;
+        return currentOutput;
+    }
+
+    string getCurCondition() const override {
+        return "Fuel: " + fuelType + ", Throttle: " + to_string(throttlePercent) + "%";
+    }
+
+    void setThrottle(double throttle) { throttlePercent = throttle; }
+    void setFuelType(const string& fuel) { fuelType = fuel; }
 };
 
 

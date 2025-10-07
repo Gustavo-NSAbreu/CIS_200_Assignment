@@ -22,22 +22,57 @@ protected:
  
 
 public:
-    // Constructors & Destructors
-    ServiceArea(const string& areaName, double requiredCapacity, double price); 
+  // Constructor
+    ServiceArea(const string& name, double requiredCapacity, double price)
+        : areaName(name), powerRequired(requiredCapacity), powerReceived(0.0), mwPrice(price) {}
 
-    // Mutators
-    void addCapacity(double amount); 
-    const double getPowerDeficit() const { return powerRequired - powerReceived; }
-    const double getTotalPriceForPower() const { return powerReceived * mwPrice; }
+    // Add power to the area (capped by requirement)
+    void addCapacity(double amount) {
+        if (amount < 0) {
+            cout << "Warning: Cannot add negative power. Ignored.\n";
+            return;
+        }
+
+        powerReceived += amount;
+        if (powerReceived > powerRequired) {
+            cout << "Warning: Power supplied exceeds requirement. Capping to requirement.\n";
+            powerReceived = powerRequired;
+        }
+    }
+
+    // Returns how much more power is needed
+    double getPowerDeficit() const { 
+        return powerRequired - powerReceived; 
+    }
+
+    // Returns total cost for power received
+    double getTotalPriceForPower() const { 
+        return powerReceived * mwPrice; 
+    }
 
     // Accessors
-    string getAreaName() const;
-    double getPowerRequired() const;
-    double getPowerProvided() const;
-    double getMWPrice() const;
- 
-    // Print and debug
-    void printAll() const;   // Prints information for debugging
+    string getAreaName() const { return areaName; }
+    double getPowerRequired() const { return powerRequired; }
+    double getPowerProvided() const { return powerReceived; }
+    double getMWPrice() const { return mwPrice; }
+
+    // Status check: true if fully supplied
+    bool isFullySupplied() const {
+        return powerReceived >= powerRequired;
+    }
+
+    // Print all info (for debugging)
+    void printAll() const {
+        cout << "Service Area: " << areaName << endl;
+        cout << "Power Required: " << powerRequired << " MW" << endl;
+        cout << "Power Received: " << powerReceived << " MW" << endl;
+        cout << "Power Deficit: " << getPowerDeficit() << " MW" << endl;
+        cout << "Price per MW: $" << mwPrice << endl;
+        cout << "Total Price: $" << getTotalPriceForPower() << endl;
+        cout << "Fully Supplied: " << (isFullySupplied() ? "Yes" : "No") << endl;
+    }
+};
+void resetPower() { powerReceived = 0.0; }
 };
 
 

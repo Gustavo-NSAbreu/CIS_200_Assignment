@@ -28,18 +28,35 @@ protected:
 
 public:
     // Constructors & Destructors
-    TransLine(const int lineID, const string& lineName, double capacity, double efficiency);
+   TransLine(int id, const string& name, double capacity, double eff)
+        : lineID(id), lineName(name), maxCapacity(capacity), capacityInUse(0.0), efficiency(eff) {}
+
     
 
     // Mutators
-    double reduceCapacity(const double powerAmount); // Reduces available capacity and returns capacity remaining 
-    double getRemainingCapacity() const;
+// Reduce available capacity and return remaining capacity
+    double reduceCapacity(double powerAmount) {
+        if (powerAmount > getRemainingCapacity()) {
+            cout << "Warning: Requested power exceeds line capacity! Setting to maximum.\n";
+            capacityInUse = maxCapacity;
+        } else {
+            capacityInUse += powerAmount;
+        }
+        return getRemainingCapacity();
+    }
 
+    // Return how much capacity is still available
+    double getRemainingCapacity() const {
+        return maxCapacity - capacityInUse;
+    }
     // Accessors - Geters and Setters
-    int     getLineID() const;
-    string  getLineName() const; 
-    double  getMaxCapacity() const;
-    double  getEfficiency() const;
-};
+   int getLineID() const { return lineID; }
+    string getLineName() const { return lineName; }
+    double getMaxCapacity() const { return maxCapacity; }
+    double getEfficiency() const { return efficiency; }
 
+// Reset line usage
+    void resetCapacity() { capacityInUse = 0.0; }
 
+void resetCapacity() { capacityInUse = 0.0; }
+}; 

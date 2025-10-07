@@ -89,5 +89,9 @@ public:
     void AllocatePowerToArea(ServiceArea& area, double powerRequested);  // Allocates power & line capacity to an area
     void generateUsageReport();                     // Generates a power report to the console
 
-};
+void adjustPlantsForConditions() {
+    for (auto& plant : plants)
+        plant->calculateOutput();
+}
+}; 
 
