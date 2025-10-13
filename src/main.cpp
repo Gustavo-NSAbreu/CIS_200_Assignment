@@ -92,7 +92,7 @@ int main() {
     myGrid.generateUsageReport();
 
     // test comment
-// test comment 
+// test comment  
 
     return 0;
 }
