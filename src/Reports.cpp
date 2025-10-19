@@ -39,8 +39,8 @@ void PowerGrid::printServceAreas() const {
 
         // Print out the area information
         cout << setw(10) << left << areaName << "   "
-            << setw(8) << right << powerRequired << "   "
-            << setw(11) << right << mwPrice << "   "
+            << fixed << setprecision(2) << setw(9) << right << powerRequired << "   "
+            << setw(12) << right << mwPrice << "   "
             << setw(8) << right << powerProvided << "   "
             << setw(11) << right << totalPriceForPower << endl;
 
@@ -67,8 +67,8 @@ void PowerGrid::printPlants() const {
 
 
     // Print column headings
-    cout << "     Plant           Type       Max Cap      Cur Cap   Avail Cap\n";
-    cout << "---------------    --------     --------    --------   ---------\n";
+    cout << "     Plant            Type      Max Cap     Cur Cap    Avail Cap\n";
+    cout << "---------------     --------   ---------   ---------  -----------\n";
 
     // Loop and print all information for each Plant.
     for (const auto& plant : plants) {
@@ -79,11 +79,11 @@ void PowerGrid::printPlants() const {
         double availableCapacity = plant->getAvailableCapacity();
 
         // Print out the plant information
-        cout << setw(15) << left << plantName << "   "
-            << setw(8) << right << plantType << "   "
-            << setw(8) << right << maxCapacity << "   "
-            << setw(8) << right << currentOutput << "   "
-            << setw(9) << right << availableCapacity << endl;
+        cout << setw(17) << left << plantName << "   "
+            << setw(8) << left << plantType << "   "
+            << fixed << setprecision(2) << setw(9) << right << maxCapacity << "   "
+            << setw(9) << right << currentOutput << "   "
+            << setw(10) << right << availableCapacity << endl;
 
         // Total sum
         maxTotal += maxCapacity;
@@ -118,9 +118,9 @@ void PowerGrid::printTransmissionLines() const {
         double capacity = line.getMaxCapacity();
         double remainingCapacity = line.getRemainingCapacity();
 
-        cout << setw(5) << left << lineID << "   "
+        cout << setw(4) << left << lineID << "   "
             << setw(17) << left << lineName << "   "
-            << fixed << setprecision(2) << setw(10) << right << efficiency << "   "
+            << fixed << setprecision(2) << setw(12) << right << efficiency << "   "
             << fixed << setprecision(0) << setw(9) << right << capacity << "   "
             << fixed << setprecision(0) << setw(9) << right << remainingCapacity << endl;
 

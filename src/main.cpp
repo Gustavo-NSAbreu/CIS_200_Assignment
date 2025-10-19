@@ -62,7 +62,7 @@ int main() {
 
     // Have each plant adjust for the conditions of the plant (Sunlight, Rain, Temperature, ...)
     myGrid.adjustPlantsForConditions();
-    cout << "\n\n\t\t\t--- Power Plant Current Condition Summary ---\n";
+    cout << "\n\n\t--- Power Plant Current Condition Summary ---\n";
     myGrid.printPlants();
 
     
