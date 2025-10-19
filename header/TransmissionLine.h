@@ -12,10 +12,12 @@
 //
 // Note: All functions in the class are inLine.  There is no TransLine.cpp in the project
 //
+#include <iostream>
 #include <string>
+
 using namespace std;
 
-class TransLine{
+class TransmissionLine{
 protected:
     int     lineID;
     string  lineName;
@@ -28,7 +30,7 @@ protected:
 
 public:
     // Constructors & Destructors
-   TransLine(int id, const string& name, double capacity, double eff)
+   TransmissionLine(int id, const string& name, double capacity, double eff)
         : lineID(id), lineName(name), maxCapacity(capacity), capacityInUse(0.0), efficiency(eff) {}
 
     
@@ -57,6 +59,4 @@ public:
 
 // Reset line usage
     void resetCapacity() { capacityInUse = 0.0; }
-
-void resetCapacity() { capacityInUse = 0.0; }
 }; 

@@ -20,13 +20,12 @@
 // Please contact for permission to reuse!
 //
 
-#include "GridDef.h"
-#include "PowerGrid.h"
 #include <iostream>
 #include <direct.h>     // For _getcwd in Windows
+#include "../header/GridDef.h"
+#include "../header/PowerGrid.h"
+
 using namespace std;
-
-
 
 //
 // main():  Main function for Power Grid project
@@ -58,7 +57,7 @@ int main() {
     myGrid.printPlants();   
      
     cout << "\n\n\t--- Initial Transmission Line Summary ---\n";
-    myGrid.printTransLines();
+    myGrid.printTransmissionLines();
     
 
     // Have each plant adjust for the conditions of the plant (Sunlight, Rain, Temperature, ...)
@@ -85,7 +84,7 @@ int main() {
     myGrid.printPlants();
 
     cout << "\n\n\t--- Final Transmission Line Summary ---\n";
-    myGrid.printTransLines();
+    myGrid.printTransmissionLines();
 
     // Generate report on usage and efficiency
     cout << endl << endl;

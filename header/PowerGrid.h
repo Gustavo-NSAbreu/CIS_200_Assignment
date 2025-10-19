@@ -11,7 +11,7 @@
 
 #include "Plant.h"
 #include "ServiceArea.h"
-#include "TransLine.h"
+#include "TransmissionLine.h"
 
 // Define the tolerance used for comparing floating point numbers
 #define FP_ROUND(x) (x+double(0.001))
@@ -52,7 +52,7 @@ private:
     // ***** => In assignment 2 and beyond, the plant vector contains pointers to a plant object, not a plant object.  
     vector<PowerPlant*>      plants;
     vector<ServiceArea>      areas;
-    vector<TransLine>        transLines;
+    vector<TransmissionLine>        transmissionLines;
     
     
     // Variables used for the power distribution algorithim
@@ -80,18 +80,13 @@ public:
     void printServceAreas() const;
 
     // Functions to add, remove, read data file, manage, and print the transmison lines
-    int  readTransLineData(const string& filename);
-    void addTransLine(int lineID, string lineName, double capacity, double efficiency);
-    void printTransLines() const;
+    int  readTransmissionLineData(const string& filename);
+    void addTransmissionLine(int lineID, string lineName, double capacity, double efficiency);
+    void printTransmissionLines() const;
 
     // Functions to distribute power : in file DistPower.cpp
     void distributePower(int percentOfRequired);    // Distributes power to the service areas
     void AllocatePowerToArea(ServiceArea& area, double powerRequested);  // Allocates power & line capacity to an area
     void generateUsageReport();                     // Generates a power report to the console
-
-void adjustPlantsForConditions() {
-    for (auto& plant : plants)
-        plant->calculateOutput();
-}
 }; 
 

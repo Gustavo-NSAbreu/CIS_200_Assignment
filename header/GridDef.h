@@ -7,25 +7,27 @@
 
 #include <string>
 
+using namespace std;
+
 // Name of company that owns the power grid
-const std::string GRID_NAME = "Rich's Amazing Energy Grid";
+const string GRID_NAME = "Rich's Amazing Energy Grid";
 
 // Filenames for data input and reports
-const std::string AREA_FILENAME       = "A2_ServiceAreas.txt"; 
-const std::string PLANTS_FILENAME     = "A2_Plants.txt";
-const std::string TRANSLINES_FILENAME = "A2_TransLines.txt";
-const std::string REPORT_FILENAME     = "A2_Report.txt";
+const string AREA_FILENAME       = "../data/A2_ServiceAreas.txt"; 
+const string PLANTS_FILENAME     = "../data/A2_Plants.txt";
+const string TRANSLINES_FILENAME = "../data/A2_TransLines.txt";
+const string REPORT_FILENAME     = "../data/A2_Report.txt";
 
 // Plant type identifiers (used when reading data files)
-const std::string PT_SOLAR       = "Solar";
-const std::string PT_WIND        = "Wind";
-const std::string PT_HYDRO       = "Hydro";
-const std::string PT_GAS         = "Gas";
-const std::string PT_NUCLEAR     = "Nuclear";
-const std::string PT_GEOTHERMAL  = "GeoTherm";
+const string PT_SOLAR       = "Solar";
+const string PT_WIND        = "Wind";
+const string PT_HYDRO       = "Hydro";
+const string PT_GAS         = "Gas";
+const string PT_NUCLEAR     = "Nuclear";
+const string PT_GEOTHERMAL  = "GeoTherm";
 
 // File header delimiter (used in data files)
-const std::string FILE_HEADER_DELIMITER = "&*****&";
+const string FILE_HEADER_DELIMITER = "&*****&";
 
 // Transmission line constants
 const int MAX_LINE_CONNECTIONS = 4;   // Maximum connections per line

@@ -13,7 +13,8 @@
 //            DistributePower.cpp: Contains the function(s) to perform the modeling algorithim.
 // 
 #include <cassert>
-#include "PowerGrid.h"
+#include "../header/PowerGrid.h"
+
 using namespace std;
 
 //********************************************************
@@ -33,13 +34,14 @@ int PowerGrid::plantCount = 0;
 //
 void PowerGrid::addPlantToGrid(PowerPlant* pPlant) {
     // Insert the pointer to the plant into the vector and increment count
-???
+    plants.push_back(pPlant);
+    plantCount++;
 }
 
 
 
 //
-// adjustPlantsforConditons():  Adjust the available cpacity of each plant by
+// adjustPlantsForConditions():  Adjust the available capacity of each plant by
 //                      calling each plants virtual function calculateOutput.
 //
 void PowerGrid::adjustPlantsForConditions() {
@@ -47,7 +49,7 @@ void PowerGrid::adjustPlantsForConditions() {
     // plant object, not a plant object.   When we itereate, the iteration variable
     // is a pointer so need to use the -> notation instead of the . notation.
 
-    // Loop and call the calculateOutputfor each plant.
+    // Loop and call the calculateOutput for each plant.
     for (const auto& plant : plants) {
         plant->calculateOutput();
     }
@@ -84,13 +86,13 @@ void PowerGrid::addServiceArea(const string name, const double requestedCap, con
 //
 // addTransLine()
 //
-void PowerGrid::addTransLine(int lineID, string lineName, double capacity, double efficiency) {
+void PowerGrid::addTransmissionLine(int lineID, string lineName, double capacity, double efficiency) {
     
-    // Declare Transline object and have constructor set the values.
-    TransLine newTransLine(lineID, lineName, capacity, efficiency);
+    // Declare Transmissionline object and have constructor set the values.
+    TransmissionLine newTransmissionLine(lineID, lineName, capacity, efficiency);
 
     // Insert into vector
-    transLines.push_back(newTransLine);
+    transmissionLines.push_back(newTransmissionLine);
 }
 
 

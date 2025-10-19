@@ -17,7 +17,8 @@
 //  3) The transmission lines are saturated  so they cannot carry and additional power.
 //       
 //
-#include "PowerGrid.h"
+#include "../header/PowerGrid.h"
+
 using namespace std;
 
 //
@@ -79,8 +80,8 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
  
     // Find the transmission line to use, In Assgin-2 we search the lines in the order
     // provided and use the first one that has the capacity to carry the power need.
-    TransLine* pCurLine = NULL;
-???
+    TransmissionLine* pCurLine = NULL;
+//???
 
 
     // Check if no line has any avaialble capacity
@@ -97,7 +98,7 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
 
     // Search the plants to find the first plant that has enough power to provide
     PowerPlant* pCurPlant = NULL;
-  ???
+  //???
 
     // Check if no power plants had any avaialble capacity
     if (pCurPlant == NULL) {
@@ -110,7 +111,7 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
     // We located a line and plant - allocate to power to the area and adjust levels
     cout << "Allocating: "
         << std::setprecision(2) << std::setw(6) << std::right << plantPowerRequested
-        << " mw from " << std::setw(17) << std::left << pCurPlant->getPlantName()
+        << " mw from " << std::setw(17) << std::left << pCurPlant->getName()
         << " On: " << pCurLine->getLineID()
         << ", " << pCurLine->getLineName()
         << endl;
@@ -118,7 +119,7 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
 
     // Allocate the power to the area by adjusting the plant, area, and line capacities
     area.addCapacity(powerRequested);                   // Add the power capacity to the area
-    pCurPlant->reduceCapacity(plantPowerRequested);    // Reduce the plant's avaiable capacity
-    pCurLine->reduceCapacity(powerRequested);           // Reduce the avaiable capacity of the line
+    // pCurPlant->reduceCapacity(plantPowerRequested);    // Reduce the plant's avaiable capacity
+    // pCurLine->reduceCapacity(powerRequested);           // Reduce the avaiable capacity of the line
 }
 

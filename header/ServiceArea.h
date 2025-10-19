@@ -19,26 +19,20 @@ protected:
     double          powerRequired;  // Total power (MW) this area needs 
     double          powerReceived;  // Amount of power (MW) currently provided
     double          mwPrice;        // Price ($) this area pays per MW
+    enum AllocStatus { ACTIVE, INACTIVE } allocStatus;
+    enum SupplyStatus { NOT_MET, PARTIAL_MET, FULLY_MET } status;
  
 
 public:
   // Constructor
     ServiceArea(const string& name, double requiredCapacity, double price)
-        : areaName(name), powerRequired(requiredCapacity), powerReceived(0.0), mwPrice(price) {}
+        : areaName(name), powerRequired(requiredCapacity), powerReceived(0.0), mwPrice(price) {
+        allocStatus = ACTIVE;
+        status = NOT_MET;
+    }
 
     // Add power to the area (capped by requirement)
-    void addCapacity(double amount) {
-        if (amount < 0) {
-            cout << "Warning: Cannot add negative power. Ignored.\n";
-            return;
-        }
-
-        powerReceived += amount;
-        if (powerReceived > powerRequired) {
-            cout << "Warning: Power supplied exceeds requirement. Capping to requirement.\n";
-            powerReceived = powerRequired;
-        }
-    }
+    void addCapacity(double amount);
 
     // Returns how much more power is needed
     double getPowerDeficit() const { 
@@ -62,17 +56,14 @@ public:
     }
 
     // Print all info (for debugging)
-    void printAll() const {
-        cout << "Service Area: " << areaName << endl;
-        cout << "Power Required: " << powerRequired << " MW" << endl;
-        cout << "Power Received: " << powerReceived << " MW" << endl;
-        cout << "Power Deficit: " << getPowerDeficit() << " MW" << endl;
-        cout << "Price per MW: $" << mwPrice << endl;
-        cout << "Total Price: $" << getTotalPriceForPower() << endl;
-        cout << "Fully Supplied: " << (isFullySupplied() ? "Yes" : "No") << endl;
-    }
+    // void printAll() const {
+    //     cout << "Service Area: " << areaName << endl;
+    //     cout << "Power Required: " << powerRequired << " MW" << endl;
+    //     cout << "Power Received: " << powerReceived << " MW" << endl;
+    //     cout << "Power Deficit: " << getPowerDeficit() << " MW" << endl;
+    //     cout << "Price per MW: $" << mwPrice << endl;
+    //     cout << "Total Price: $" << getTotalPriceForPower() << endl;
+    //     cout << "Fully Supplied: " << (isFullySupplied() ? "Yes" : "No") << endl;
+    // }
+    void resetPower() { powerReceived = 0.0; }
 };
-void resetPower() { powerReceived = 0.0; }
-};
-
-

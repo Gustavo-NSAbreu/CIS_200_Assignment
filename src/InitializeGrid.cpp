@@ -4,10 +4,11 @@
 // This is currently a public member function of the PowerGrid class and 
 // it primarily uses private member functions of the Grid class.
 // 
-#include "GridDef.h"
-#include "PowerGrid.h"
-using namespace std;
+#include "../header/GridDef.h"
+#include "../header/PowerGrid.h"
+#include <assert.h>
 
+using namespace std;
 
 //*******************************************************
 //*****       Grid Initilization Function           *****
@@ -29,7 +30,7 @@ int PowerGrid::initializeGrid(const string name,
     if (rc != 0)  return rc;
     cout << "Plant data successfully completed." << endl;
 
-    rc = readTransLineData(transLineFilename);
+    rc = readTransmissionLineData(transLineFilename);
     if (rc != 0)  return rc;
     cout << "Transmission Line data successfully completed." << endl;
 
@@ -99,7 +100,7 @@ int PowerGrid::readPlantData(const string& filename) {
     // Variables used to read demand info from file
     string name, type;
     double costPerMW = 0.0;
-    double maxCapacity = 0.0;
+    double maxOutput = 0.0;
 
     // Declare input stream and open data file for reading
     ifstream isPlant(filename);
@@ -114,14 +115,14 @@ int PowerGrid::readPlantData(const string& filename) {
         getline(isPlant, name, ',');
 
         // Read the remainder of the values on the line
-        isPlant >> type >> maxCapacity >> costPerMW;
+        isPlant >> type >> maxOutput >> costPerMW;
     };
  
     /// Skip the informational header linesat start of file
     string headerLine;
     do {
         getline(isPlant, headerLine);
-    } while (headerLine != FILE_HEADER_DELIMTER);
+    } while (headerLine != FILE_HEADER_DELIMITER);
 
 
     // Read the first line of file into local variables using local lambda function
@@ -138,36 +139,61 @@ int PowerGrid::readPlantData(const string& filename) {
             isPlant >> numAcres >> sunlightHours;
             
             // Allocate a solar farm object with information read
-            SolarFarm *pSolar = new SolarFarm(name, maxCapacity, costPerMW, numAcres, sunlightHours);
+            SolarFarm *pSolar = new SolarFarm(name, maxOutput, costPerMW, numAcres, sunlightHours);
             addPlantToGrid(pSolar);
         }
 
         else if (type == PT_WIND) {
             int turbineCnt;
-            double windSpeed = 0.0;
-            double bladeLen = 0.0;
- ???
+            double windSpeed;
+            double bladeLen;
+
+            // Read additional fields and declare wind farm
+            isPlant >> turbineCnt >> bladeLen >> windSpeed;
+
+            // Allocate a wind farm object with information read
+            WindFarm *pWind = new WindFarm(name, maxOutput, costPerMW, turbineCnt, bladeLen, windSpeed);
+            addPlantToGrid(pWind);
         }
 
         else if (type == PT_HYDRO) {
-            double flowRate = 0.0;
-            double drop = 0.0;
- ???
+            double flowRate;
+            double drop;
+
+            // Read additional fields and declare hydro plant
+            isPlant >> flowRate >> drop;
+
+            // Allocate a hydro plant object with information read
+            HydroPlant *pHydro = new HydroPlant(name, maxOutput, costPerMW, flowRate, drop);
+            addPlantToGrid(pHydro);
         }
 
         else if (type == PT_NUCLEAR) {
-            int     fuelRodsInUse;
+            int fuelRodsInUse;
+
+            // Read additional fields and declare nuclear plant
             isPlant >> fuelRodsInUse;
-???
+
+            // Allocate a nuclear plant object with information read
+            NuclearPlant* pNuclear = new NuclearPlant(name, maxOutput, costPerMW, fuelRodsInUse);
+            addPlantToGrid(pNuclear);
         }
 
-        else if (type == PT_GEO_THERMAL) {
-            GeothermalPlant* pGeo = new GeothermalPlant(name, maxCapacity, costPerMW);
-???
+        else if (type == PT_GEOTHERMAL) {
+            // Allocate a geothermal plant object with information read
+            GeothermalPlant* pGeothermal = new GeothermalPlant(name, maxOutput, costPerMW);
+            addPlantToGrid(pGeothermal);
         }
 
         else if (type == PT_GAS) {
-???
+
+            string fuelType;
+            double throttlePercent;
+            isPlant >> fuelType >> throttlePercent;
+
+            // Allocate a gas plant object with information read
+            GasPlant* pGas = new GasPlant(name, maxOutput, costPerMW, fuelType, throttlePercent);
+            addPlantToGrid(pGas);
         }
 
 
@@ -196,9 +222,9 @@ int PowerGrid::readPlantData(const string& filename) {
 //  readTransLineData():   Reads the information about each transLine 
 //              from the data file and adds them to the grid
 //
-int PowerGrid::readTransLineData(const string& fileName) {
+int PowerGrid::readTransmissionLineData(const string& fileName) {
 
-    // Variables used to read transLine info from file
+    // Variables used to read transmission line info from file
     int     lineID = 0;
     string  lineName;
     double  lineCapacity = 0.0;
@@ -207,8 +233,8 @@ int PowerGrid::readTransLineData(const string& fileName) {
 
 
     // Declare input stream and open data file for reading
-    ifstream isTransLine(fileName);
-    if (!isTransLine) {
+    ifstream isTransmissionLine(fileName);
+    if (!isTransmissionLine) {
         cerr << "Error: Unable to open file " << fileName << endl;
         return -1;
     }
@@ -217,24 +243,24 @@ int PowerGrid::readTransLineData(const string& fileName) {
     // Read and skip the header lines until the delimiter is econtered
     string headerLine;
     do {
-        getline(isTransLine, headerLine);
-    } while (headerLine != FILE_HEADER_DELIMTER);
+        getline(isTransmissionLine, headerLine);
+    } while (headerLine != FILE_HEADER_DELIMITER);
  
 
 
     // Lambda function to read a line from file and parse into local varaibles
     auto readLineFromFile = [&]() {
 
-        isTransLine >> lineID;    // first field is Line ID (an integer)
+        isTransmissionLine >> lineID;    // first field is Line ID (an integer)
 
         // The name of line may be multiple words - read until we get a digit
-        isTransLine >> lineName;        // Read first word
-        isTransLine >> temp;            // Read next info in the file
+        isTransmissionLine >> lineName;        // Read first word
+        isTransmissionLine >> temp;            // Read next info in the file
         while (!isdigit(temp[0])) {     // If it does not start with a digit it is part of the name
             lineName = lineName + " " + temp;
-            isTransLine >> temp;
+            isTransmissionLine >> temp;
 
-            if (isTransLine.fail())     // Check if something went wrong in the stream
+            if (isTransmissionLine.fail())     // Check if something went wrong in the stream
                 return;
         }
 
@@ -242,18 +268,21 @@ int PowerGrid::readTransLineData(const string& fileName) {
         lineCapacity = stod(temp);
 
         // Last value on line is the efficiency
-        isTransLine >> efficiency;
+        isTransmissionLine >> efficiency;
      };
 
     // Read the first transLine record from the file using lambda function
     readLineFromFile();
-
+    
     // Process the records in the file 
-    while (!isTransLine.eof() && !isTransLine.fail()) {
+    while (!isTransmissionLine.eof() && !isTransmissionLine.fail()) {
 
- ???
+        addTransmissionLine(lineID, lineName, lineCapacity, efficiency);
+
+        // Read the next line of the file using local lambda function
+        readLineFromFile();
     }
 
-    isTransLine.close();
+    isTransmissionLine.close();
     return 0;
 }

@@ -7,7 +7,8 @@
 // 
 //     
 //
-#include "PowerGrid.h"
+#include "../header/PowerGrid.h"
+
 using namespace std;
 
 
@@ -29,7 +30,25 @@ void PowerGrid::printServceAreas() const {
     cout << "----------    --------    -----------   --------   -----------\n";
 
     // Loop and print all information for each area.
-???
+    for (const auto& area : areas) {
+        string areaName =  area.getAreaName();
+        double powerRequired = area.getPowerRequired();
+        double powerProvided = area.getPowerProvided();
+        double totalPriceForPower = area.getTotalPriceForPower();
+        double mwPrice = area.getMWPrice();
+
+        // Print out the area information
+        cout << setw(10) << left << areaName << "   "
+            << setw(8) << right << powerRequired << "   "
+            << setw(11) << right << mwPrice << "   "
+            << setw(8) << right << powerProvided << "   "
+            << setw(11) << right << totalPriceForPower << endl;
+
+        // Total sum
+        reqTotal += powerRequired;
+        supTotal += powerProvided;
+        priceTotal += totalPriceForPower;
+    }
 }
 
 
@@ -52,17 +71,35 @@ void PowerGrid::printPlants() const {
     cout << "---------------    --------     --------    --------   ---------\n";
 
     // Loop and print all information for each Plant.
-???
+    for (const auto& plant : plants) {
+        string plantName = plant->getName();
+        string plantType = plant->getType();
+        double maxCapacity = plant->getMaxPowerOutput();
+        double currentOutput = plant->getCurrentOutput();
+        double availableCapacity = plant->getAvailableCapacity();
+
+        // Print out the plant information
+        cout << setw(15) << left << plantName << "   "
+            << setw(8) << right << plantType << "   "
+            << setw(8) << right << maxCapacity << "   "
+            << setw(8) << right << currentOutput << "   "
+            << setw(9) << right << availableCapacity << endl;
+
+        // Total sum
+        maxTotal += maxCapacity;
+        curTotal += currentOutput;
+        availTotal += availableCapacity;
+    }
 }
 
 
 
 //***********************************************
 // 
-// printTransLines()
+// printTransmissionLines()
 //
 //***********************************************
-void PowerGrid::printTransLines() const {
+void PowerGrid::printTransmissionLines() const {
 
     // Variables to accumlate totals
     double maxTotal = 0;
@@ -70,11 +107,27 @@ void PowerGrid::printTransLines() const {
 
 
     // Print column headings
-    cout << " ID           Name         Efficiency    Capacity   Remaining\n";
-    cout << "----   ------------------  ----------    --------   ---------\n";
+    cout << " ID           Name           Efficiency    Capacity   Remaining\n";
+    cout << "----   ------------------    ----------    --------   ---------\n";
 
-    // Loop and print all information for each transLine.
-???
+    // Loop and print all information for each transmission line.
+    for (const auto& line : transmissionLines) {
+        int lineID = line.getLineID();
+        string lineName = line.getLineName();
+        double efficiency = line.getEfficiency();
+        double capacity = line.getMaxCapacity();
+        double remainingCapacity = line.getRemainingCapacity();
+
+        cout << setw(5) << left << lineID << "   "
+            << setw(17) << left << lineName << "   "
+            << fixed << setprecision(2) << setw(10) << right << efficiency << "   "
+            << fixed << setprecision(0) << setw(9) << right << capacity << "   "
+            << fixed << setprecision(0) << setw(9) << right << remainingCapacity << endl;
+
+        // Total sum
+        maxTotal += capacity;
+        remainTotal += remainingCapacity;
+    }
 }
 
 //***********************************************
@@ -100,11 +153,11 @@ void PowerGrid::generateUsageReport() {
         double powerPrice = area.getTotalPriceForPower();
 
         // Print out the demand inforamtion
-        cout << std::setw(10) << std::left << area.getAreaName() << " | "
-            << std::setprecision(2) << std::setw(12) << std::right << powerRequired << " | "
-            << std::setprecision(2) << std::setw(12) << std::right << powerProvided << " | "
-            << std::setprecision(2) << std::setw(5) << std::right << percentProvided << "%  | "
-            << std::setprecision(2) << std::setw(10) << std::right << powerPrice << " | "
+        cout << setw(10) << left << area.getAreaName() << " | "
+            << fixed << setprecision(2) << setw(12) << right << powerRequired << " | "
+            << fixed << setprecision(2) << setw(12) << right << powerProvided << " | "
+            << fixed << setprecision(2) << setw(5) << right << percentProvided << "%  | "
+            << fixed << setprecision(2) << setw(10) << right << powerPrice << " | "
             << endl;
 
         // Collect the total requested and supplied Demand
@@ -115,7 +168,7 @@ void PowerGrid::generateUsageReport() {
     // Loop through the plants and total how much capacity was used.
     double totalPlantUsage = 0;
     for (auto& plant : plants) {
-        double plantUsage = plant->getCapacityAllocated();
+        double plantUsage = plant->getCurrentOutput();
         totalPlantUsage += plantUsage;
     }
 
@@ -131,5 +184,5 @@ void PowerGrid::generateUsageReport() {
     //
     // Determine the profit or loss for operating the grid
     //
-    ???
+    //???
 }

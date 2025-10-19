@@ -27,18 +27,17 @@ using namespace std;
 //
 class PowerPlant {
 protected:
-    string  plantName;
-    string  type;
-    double  maxPowerOuput = 0.0;        // The absolute maximum capacity of the plant
+    string name;
+    string type;
+    double maxPowerOutput = 0.0;        // The absolute maximum capacity of the plant
     double operatingCost = 0.0;    // Cost per megawatt ($)
     double currentOutput = 0.0; // Current calculated output (MW)
 
 public:
     // Constructors & Destructors
-   PowerPlant(const string& name, const string& type, double maxCapacity, double cost)
-    : plantName(name), type(type), maxCapacity(maxCapacity), operatingCost(cost), currentOutput(0.0) {}
+    PowerPlant(const string& name, const string& type, double maxPowerOutput, double cost)
+        : name(name), type(type), maxPowerOutput(maxPowerOutput), operatingCost(cost), currentOutput(0.0) {}
 
-        
     // Virtual destructor
     virtual ~PowerPlant() = default;
 
@@ -46,26 +45,32 @@ public:
     virtual double calculateOutput() = 0;
 
     // Virtual function for current conditions
-    virtual string getCurCondition() const { return "Normal"; }
+    virtual string getCurrentCondition() const { return "Normal"; }
 
     // Getters and Setters
-    string getPlantName() const { return plantName; }
+    string getName() const { return name; }
     string getType() const { return type; }
     double getMaxPowerOutput() const { return maxPowerOutput; }
     double getOperatingCost() const { return operatingCost; }
     double getCurrentOutput() const { return currentOutput; }
 
+    double getAvailableCapacity() const {
+        return maxPowerOutput - currentOutput;
+    }
+
      
     // Prints all the information for the plant
-    virtual void printAll() const {
-        cout << "----------------------------------------\n";
-        cout << "Plant: " << plantName << " (" << type << ")\n";
-        cout << "Max Power Output: " << maxPowerOutput << " MW\n";
-        cout << "Operating Cost: $" << operatingCost << " per MW\n";
-        cout << "Current Output: " << currentOutput << " MW\n";
-        cout << "Current Conditions: " << getCurCondition() << endl;
-        cout << "----------------------------------------\n";
-    }
+    // virtual void printAll() const {
+    //     cout << "----------------------------------------\n";
+    //     cout << "Plant: " << name << " (" << type << ")\n";
+    //     cout << "Max Power Output: " << maxPowerOutput << " MW\n";
+    //     cout << "Operating Cost: $" << operatingCost << " per MW\n";
+    //     cout << "Current Output: " << currentOutput << " MW\n";
+    //     cout << "Current Conditions: " << getCurrentCondition() << endl;
+    //     cout << "----------------------------------------\n";
+    // }
+
+    void reduceCapacity(double amount);
 };
 
 
@@ -82,17 +87,13 @@ private:
     double sunlightHours;   // hours of sunlight today (dynamic)
 
 public:
-    SolarFarm(const string& name, double maxOutput, double cost, double acres)
-        : PowerPlant(name, "Solar", maxOutput, cost), numAcres(acres), sunlightHours(6) {}
+    SolarFarm(const string& name, double maxOutput, double cost, double acres, double sunlightHours)
+        : PowerPlant(name, PT_SOLAR, maxOutput, cost), numAcres(acres), sunlightHours(sunlightHours) {}
 
     // Dynamic sunlight affects output
-    double calculateOutput() override {
-        double factor = sunlightHours / 12.0; // normalize to 0–1
-        currentOutput = maxPowerOutput * factor;
-        return currentOutput;
-    }
+    double calculateOutput() override;
 
-    string getCurCondition() const override {
+    string getCurrentCondition() const override {
         return "Sunlight Hours: " + to_string(sunlightHours);
     }
 
@@ -108,18 +109,15 @@ class WindFarm : public PowerPlant {
 private:
     int turbineCount;
     double avgWindSpeed;    // miles per hour
+    double bladeLength;        // blade length
 
 public:
-    WindFarm(const string& name, double maxOutput, double cost, int turbines)
-        : PowerPlant(name, "Wind", maxOutput, cost), turbineCount(turbines), avgWindSpeed(10) {}
+    WindFarm(string& name, double maxPowerOutput, double cost, int turbines, double bladeLen, double windSpeed)
+        : PowerPlant(name, PT_WIND,  maxPowerOutput, cost), turbineCount(turbines), bladeLength(bladeLength), avgWindSpeed(windSpeed) {}
 
-    double calculateOutput() override {
-        double factor = min(avgWindSpeed / 25.0, 1.0); // cap at 1.0
-        currentOutput = maxPowerOutput * factor;
-        return currentOutput;
-    }
+    virtual double calculateOutput() override;
 
-    string getCurCondition() const override {
+    string getCurrentCondition() const override {
         return "Average Wind Speed: " + to_string(avgWindSpeed) + " mph";
     }
 
@@ -138,19 +136,12 @@ private:
     double verticalDrop; // meters
 
 public:
-    HydroPlant(const string& name, double maxOutput, double cost,
-               double flowRate, double drop)
-        : PowerPlant(name, "Hydro", maxOutput, cost),
-          inFlowRate(flowRate), verticalDrop(drop) {}
+    HydroPlant(const string& name, double maxOutput, double cost, double flowRate, double drop)
+        : PowerPlant(name, PT_HYDRO, maxOutput, cost), inFlowRate(flowRate), verticalDrop(drop) {}
 
-    double calculateOutput() override {
-        // Simplified formula: power proportional to flow * drop
-        double factor = min((inFlowRate * verticalDrop) / 1000.0, 1.0);
-        currentOutput = maxPowerOutput * factor;
-        return currentOutput;
-    }
+    double calculateOutput() override;
 
-    string getCurCondition() const override {
+    string getCurrentCondition() const override {
         return "Flow: " + to_string(inFlowRate) + " m^3/s, Drop: " + to_string(verticalDrop) + " m";
     }
 
@@ -167,15 +158,11 @@ private:
 
 public:
     NuclearPlant(const string& name, double maxOutput, double cost, int rods)
-        : PowerPlant(name, "Nuclear", maxOutput, cost), fuelRodsActive(rods) {}
+        : PowerPlant(name, PT_NUCLEAR, maxOutput, cost), fuelRodsActive(rods) {}
 
-    double calculateOutput() override {
-        double factor = min(fuelRodsActive / 100.0, 1.0); // max 100 rods
-        currentOutput = maxPowerOutput * factor;
-        return currentOutput;
-    }
+    double calculateOutput() override;
 
-    string getCurCondition() const override {
+    string getCurrentCondition() const override {
         return "Fuel Rods Active: " + to_string(fuelRodsActive);
     }
 
@@ -189,17 +176,13 @@ public:
 class GeothermalPlant : public PowerPlant {
 public:
     GeothermalPlant(const string& name, double maxOutput, double cost)
-        : PowerPlant(name, "Geothermal", maxOutput, cost) {}
+        : PowerPlant(name, PT_GEOTHERMAL, maxOutput, cost) {}
 
-    double calculateOutput() override {
-        // Stable output, just use max
-        currentOutput = maxPowerOutput;
-        return currentOutput;
-    }
+    double calculateOutput() override;
 
-    string getCurCondition() const override {
-        return "Stable geothermal output";
-    }
+    // string getCurrentCondition() const override {
+    //     return "Stable geothermal output";
+    // }
 };
 
 
@@ -213,17 +196,12 @@ private:
     double throttlePercent; // 0–100
 
 public:
-    GasPlant(const string& name, double maxOutput, double cost, const string& fuel, double throttle)
-        : PowerPlant(name, "Gas", maxOutput, cost),
-          fuelType(fuel), throttlePercent(throttle) {}
+    GasPlant(const string& name, double capacity, double cost, const string& fuel, double throttlePer)
+        : PowerPlant(name, PT_GAS, capacity, cost), fuelType(fuel), throttlePercent(throttlePer) {}
 
-    double calculateOutput() override {
-        double factor = throttlePercent / 100.0;
-        currentOutput = maxPowerOutput * factor;
-        return currentOutput;
-    }
+    double calculateOutput() override;
 
-    string getCurCondition() const override {
+    string getCurrentCondition() const override {
         return "Fuel: " + fuelType + ", Throttle: " + to_string(throttlePercent) + "%";
     }
 
