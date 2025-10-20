@@ -86,7 +86,7 @@ public:
 
     // Functions to distribute power : in file DistPower.cpp
     void distributePower(int percentOfRequired);    // Distributes power to the service areas
-    void AllocatePowerToArea(ServiceArea& area, double powerRequested);  // Allocates power & line capacity to an area
+    void allocatePowerToArea(ServiceArea& area, double powerRequested);  // Allocates power & line capacity to an area
     void generateUsageReport();                     // Generates a power report to the console
 }; 
 

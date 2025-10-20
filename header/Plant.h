@@ -32,11 +32,12 @@ protected:
     double maxPowerOutput = 0.0;        // The absolute maximum capacity of the plant
     double operatingCost = 0.0;    // Cost per megawatt ($)
     double currentOutput = 0.0; // Current calculated output (MW)
+    double availableCapacity = 0.0; // Available output (MW)
 
 public:
     // Constructors & Destructors
     PowerPlant(const string& name, const string& type, double maxPowerOutput, double cost)
-        : name(name), type(type), maxPowerOutput(maxPowerOutput), operatingCost(cost), currentOutput(0.0) {}
+        : name(name), type(type), maxPowerOutput(maxPowerOutput), operatingCost(cost), currentOutput(0.0), availableCapacity(0.0) {}
 
     // Virtual destructor
     virtual ~PowerPlant() = default;
@@ -53,29 +54,12 @@ public:
     double getMaxPowerOutput() const { return maxPowerOutput; }
     double getOperatingCost() const { return operatingCost; }
     double getCurrentOutput() const { return currentOutput; }
-
-    double getAvailableCapacity() const {
-        return maxPowerOutput - currentOutput;
-    }
-
-     
-    // Prints all the information for the plant
-    // virtual void printAll() const {
-    //     cout << "----------------------------------------\n";
-    //     cout << "Plant: " << name << " (" << type << ")\n";
-    //     cout << "Max Power Output: " << maxPowerOutput << " MW\n";
-    //     cout << "Operating Cost: $" << operatingCost << " per MW\n";
-    //     cout << "Current Output: " << currentOutput << " MW\n";
-    //     cout << "Current Conditions: " << getCurrentCondition() << endl;
-    //     cout << "----------------------------------------\n";
-    // }
+    double getAvailableCapacity() const { return availableCapacity; }
 
     void reduceCapacity(double amount);
+    double getCapacityAllocated() const;
+    double getCostOfAllocatedPower() const;
 };
-
-
-
-
 
 //******************************************************
 //                  Solar Plant                    *****
@@ -93,9 +77,7 @@ public:
     // Dynamic sunlight affects output
     double calculateOutput() override;
 
-    string getCurrentCondition() const override {
-        return "Sunlight Hours: " + to_string(sunlightHours);
-    }
+    string getCurrentCondition() const override;
 
     void setSunlightHours(double hours) { sunlightHours = hours; }
 };
@@ -113,14 +95,13 @@ private:
 
 public:
     WindFarm(string& name, double maxPowerOutput, double cost, int turbines, double bladeLen, double windSpeed)
-        : PowerPlant(name, PT_WIND,  maxPowerOutput, cost), turbineCount(turbines), bladeLength(bladeLength), avgWindSpeed(windSpeed) {}
+        : PowerPlant(name, PT_WIND,  maxPowerOutput, cost), turbineCount(turbines), bladeLength(bladeLen), avgWindSpeed(windSpeed) {}
 
-    virtual double calculateOutput() override;
+    double calculateOutput() override;
 
-    string getCurrentCondition() const override {
-        return "Average Wind Speed: " + to_string(avgWindSpeed) + " mph";
-    }
+    string getCurrentCondition() const override;
 
+    double getBladeLength() const { return bladeLength; }
     void setAvgWindSpeed(double speed) { avgWindSpeed = speed; }
 };
 
@@ -141,9 +122,7 @@ public:
 
     double calculateOutput() override;
 
-    string getCurrentCondition() const override {
-        return "Flow: " + to_string(inFlowRate) + " m^3/s, Drop: " + to_string(verticalDrop) + " m";
-    }
+    string getCurrentCondition() const override;
 
     void setFlowRate(double flow) { inFlowRate = flow; }
     void setVerticalDrop(double drop) { verticalDrop = drop; }
@@ -162,9 +141,7 @@ public:
 
     double calculateOutput() override;
 
-    string getCurrentCondition() const override {
-        return "Fuel Rods Active: " + to_string(fuelRodsActive);
-    }
+    string getCurrentCondition() const override;
 
     void setFuelRods(int rods) { fuelRodsActive = rods; }
 };
@@ -180,9 +157,7 @@ public:
 
     double calculateOutput() override;
 
-    // string getCurrentCondition() const override {
-    //     return "Stable geothermal output";
-    // }
+    string getCurrentCondition() const override;
 };
 
 
@@ -201,12 +176,8 @@ public:
 
     double calculateOutput() override;
 
-    string getCurrentCondition() const override {
-        return "Fuel: " + fuelType + ", Throttle: " + to_string(throttlePercent) + "%";
-    }
+    string getCurrentCondition() const override;
 
     void setThrottle(double throttle) { throttlePercent = throttle; }
     void setFuelType(const string& fuel) { fuelType = fuel; }
 };
-
-

@@ -1,18 +1,9 @@
 Service Area     Power       Price per
     Name        Required     MW Hour($)
-Ford-Rouge         75          160
+AnnArbor           296         255
+Toledo             415         240
 Ypsilanti          88          230
 Livonia            205         215
 Canton             135         180
-AnnArbor           296         255
 Dearborn           317         180
-Toledo             415         240
-
-
-
-
-
-
-
-
-
+Ford-Rouge         75          160

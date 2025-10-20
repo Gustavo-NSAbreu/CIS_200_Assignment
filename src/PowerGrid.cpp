@@ -27,7 +27,6 @@ int PowerGrid::plantCount = 0;
 //*****        Functions for Power Plants            *****
 //********************************************************
 
-
 //
 // addPlantToGrid() Adds a new plant to the grid.  
 //          Receives a reference to a plant object and places it plant vector 
@@ -37,8 +36,6 @@ void PowerGrid::addPlantToGrid(PowerPlant* pPlant) {
     plants.push_back(pPlant);
     plantCount++;
 }
-
-
 
 //
 // adjustPlantsForConditions():  Adjust the available capacity of each plant by
@@ -54,10 +51,6 @@ void PowerGrid::adjustPlantsForConditions() {
         plant->calculateOutput();
     }
 }
-
-
-
-
 
 //********************************************************
 //*****         Functions for Service Areas          *****
@@ -75,13 +68,9 @@ void PowerGrid::addServiceArea(const string name, const double requestedCap, con
     areas.push_back(newSvcArea);
 }
 
-
-
-
 //********************************************************
 //*****      Functions for Transmission Lnes         *****
 //********************************************************
-
 
 //
 // addTransLine()
@@ -94,5 +83,3 @@ void PowerGrid::addTransmissionLine(int lineID, string lineName, double capacity
     // Insert into vector
     transmissionLines.push_back(newTransmissionLine);
 }
-
-

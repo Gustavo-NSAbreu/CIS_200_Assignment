@@ -49,6 +49,13 @@ void PowerGrid::printServceAreas() const {
         supTotal += powerProvided;
         priceTotal += totalPriceForPower;
     }
+
+    // Print totals
+    cout << "-- Total --" << "   "
+        << fixed << setprecision(2) << setw(8) << right << reqTotal << "   "
+        << setw(23) << right << supTotal << "   "
+        << setw(11) << right << priceTotal
+        << endl;
 }
 
 
@@ -83,13 +90,21 @@ void PowerGrid::printPlants() const {
             << setw(8) << left << plantType << "   "
             << fixed << setprecision(2) << setw(9) << right << maxCapacity << "   "
             << setw(9) << right << currentOutput << "   "
-            << setw(10) << right << availableCapacity << endl;
+            << setw(10) << right << availableCapacity << "   "
+            << left << plant->getCurrentCondition() << endl;
 
         // Total sum
         maxTotal += maxCapacity;
         curTotal += currentOutput;
         availTotal += availableCapacity;
     }
+
+    // Print totals
+    cout << "-- Total --" << "   "
+        << fixed << setprecision(2) << setw(26) << right << maxTotal << "   "
+        << setw(9) << right << curTotal << "   "
+        << setw(10) << right << availTotal << "   "
+        << endl;
 }
 
 
@@ -128,6 +143,11 @@ void PowerGrid::printTransmissionLines() const {
         maxTotal += capacity;
         remainTotal += remainingCapacity;
     }
+
+    // Print totals
+    cout << "       -- Total --" << "   "
+        << fixed << setprecision(0) << setw(30) << right << maxTotal << "   "
+        << setw(9) << right << remainTotal << endl;
 }
 
 //***********************************************
@@ -149,7 +169,7 @@ void PowerGrid::generateUsageReport() {
     for (auto& area : areas) {
         double powerRequired = area.getPowerRequired();    // Power the area needs
         double powerProvided = area.getPowerProvided();    // Power that the Grid could supply
-        double percentProvided = powerProvided / powerRequired;
+        double percentProvided = powerProvided / powerRequired * 100; // Percent of power supplied
         double powerPrice = area.getTotalPriceForPower();
 
         // Print out the demand inforamtion
@@ -168,21 +188,41 @@ void PowerGrid::generateUsageReport() {
     // Loop through the plants and total how much capacity was used.
     double totalPlantUsage = 0;
     for (auto& plant : plants) {
-        double plantUsage = plant->getCurrentOutput();
-        totalPlantUsage += plantUsage;
+        totalPlantUsage += plant->getCapacityAllocated();;
     }
 
     cout << endl << endl << "Overall Grid Performance:" << endl;
     cout << "    Total Demand Request:  " << totalPowerRequested << " MW" << endl;
     cout << "    Total Demand supplied: " << totalPowerSupplied << " MW" << endl;
-    cout << "    Percent of demand met: " << (totalPowerSupplied / totalPowerRequested) << "%" << endl;
+    cout << "    Percent of demand met: " << (totalPowerSupplied / totalPowerRequested) * 100 << "%" << endl;
     cout << endl;
     cout << "    Plant Capacity used:   " << totalPlantUsage << " MW" << endl;
-    cout << "    Average Delivery Efficiency %: " << (totalPowerSupplied / totalPlantUsage) << endl;
-
+    cout << "    Average Delivery Efficiency %: " << (totalPowerSupplied / totalPlantUsage) * 100 << endl;
+    cout << endl << endl;
 
     //
     // Determine the profit or loss for operating the grid
     //
-    //???
+
+    double grossPay = 0.0;
+    double totalCost = 0.0;
+    double profit = 0.0;
+
+    // Loop through each area to total up the gross payment
+    for (const auto& area : areas) {
+        grossPay += area.getTotalPriceForPower();
+    }
+
+    // Loop through each plant to total up the operating cost
+    for (const auto& plant : plants) {
+        totalCost += plant->getCostOfAllocatedPower();
+    }
+
+    // Determine profit
+    profit = grossPay - totalCost;
+
+    cout << "Total price by all areas paid for power they used today: $" << grossPay << endl;
+    cout << "Total cost of producing this power: $" << totalCost << endl;
+    cout << "Operating profit for my Power Grid today: $" << profit << endl;
+
 }

@@ -11,6 +11,8 @@
 // quickly report on the status of if their requiermends are satisfied.
 // 
 #include <string>
+#include <cmath>
+
 using namespace std;
 
 class ServiceArea {
@@ -36,8 +38,9 @@ public:
 
     // Returns how much more power is needed
     double getPowerDeficit() const { 
-        return powerRequired - powerReceived; 
+        return fabs(powerRequired - powerReceived); 
     }
+
 
     // Returns total cost for power received
     double getTotalPriceForPower() const { 
@@ -54,16 +57,6 @@ public:
     bool isFullySupplied() const {
         return powerReceived >= powerRequired;
     }
-
-    // Print all info (for debugging)
-    // void printAll() const {
-    //     cout << "Service Area: " << areaName << endl;
-    //     cout << "Power Required: " << powerRequired << " MW" << endl;
-    //     cout << "Power Received: " << powerReceived << " MW" << endl;
-    //     cout << "Power Deficit: " << getPowerDeficit() << " MW" << endl;
-    //     cout << "Price per MW: $" << mwPrice << endl;
-    //     cout << "Total Price: $" << getTotalPriceForPower() << endl;
-    //     cout << "Fully Supplied: " << (isFullySupplied() ? "Yes" : "No") << endl;
-    // }
+    
     void resetPower() { powerReceived = 0.0; }
 };

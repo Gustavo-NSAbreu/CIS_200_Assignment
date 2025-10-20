@@ -32,10 +32,10 @@ using namespace std;
 // 
 //  percentRequested is the ammount of an area's power needs we try to allocate. 
 // 
-void PowerGrid::distributePower(int AreaPercentage) {
+void PowerGrid::distributePower(int areaPercentage) {
 
     // Print status message
-    cout << endl << "Distributing power based on " << AreaPercentage << "% allocation." << endl;
+    cout << endl << "Distributing power based on " << areaPercentage << "% allocation." << endl;
 
     // Setup inital conditions in control variable in PowerGrid object
     plantsHaveCapacity = 1;
@@ -50,12 +50,12 @@ void PowerGrid::distributePower(int AreaPercentage) {
             // The amount of power to request for this area is either the 
             // requested percent of its needs or the amount to fulfill 
             // its total power needs,(i.e  powerDeficit), whichever is smaller 
-            double percentOfRequested = area.getPowerRequired() * AreaPercentage / 100.0;
+            double percentOfRequested = area.getPowerRequired() * areaPercentage / 100.0;
             double deficit = area.getPowerDeficit();
             double power = min(percentOfRequested, deficit);
 
             // Try to find and deliver power for the area
-            AllocatePowerToArea(area, power); 
+            allocatePowerToArea(area, power);
         }
 
     } // for
@@ -70,7 +70,7 @@ void PowerGrid::distributePower(int AreaPercentage) {
 // single line.  If a plant and line cannot be found, then the area is deemed to only
 // have partial power neds met.
 // 
-void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
+void PowerGrid::allocatePowerToArea(ServiceArea &area, double powerRequested) {
 
     // Display initial request.
     cout << std::setw(12) << std::left << area.getAreaName()
@@ -81,8 +81,13 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
     // Find the transmission line to use, In Assgin-2 we search the lines in the order
     // provided and use the first one that has the capacity to carry the power need.
     TransmissionLine* pCurLine = NULL;
-//???
 
+    for (auto& line : transmissionLines) {
+        if (line.getRemainingCapacity() >= powerRequested) {
+            pCurLine = &line; // Found a line with capacity
+            break;
+        }
+    }
 
     // Check if no line has any avaialble capacity
     if (pCurLine == NULL) {
@@ -93,12 +98,16 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
 
 
     // Adjust the amount of power required based on the transmission line efficency
-    double plantPowerRequested = powerRequested / pCurLine->getEfficiency();
-
+    double plantPowerRequested = powerRequested * pCurLine->getEfficiency();
 
     // Search the plants to find the first plant that has enough power to provide
     PowerPlant* pCurPlant = NULL;
-  //???
+    for (auto& plant : plants) {
+        if (plant->getAvailableCapacity() >= plantPowerRequested) {
+            pCurPlant = plant; // Found a plant with capacity
+            break;
+        }
+    }
 
     // Check if no power plants had any avaialble capacity
     if (pCurPlant == NULL) {
@@ -110,16 +119,16 @@ void PowerGrid::AllocatePowerToArea(ServiceArea &area, double powerRequested) {
 
     // We located a line and plant - allocate to power to the area and adjust levels
     cout << "Allocating: "
-        << std::setprecision(2) << std::setw(6) << std::right << plantPowerRequested
-        << " mw from " << std::setw(17) << std::left << pCurPlant->getName()
+        << setprecision(2) << setw(6) << right << plantPowerRequested
+        << " mw from " << setw(17) << left << pCurPlant->getName()
         << " On: " << pCurLine->getLineID()
         << ", " << pCurLine->getLineName()
         << endl;
 
 
     // Allocate the power to the area by adjusting the plant, area, and line capacities
-    area.addCapacity(powerRequested);                   // Add the power capacity to the area
-    // pCurPlant->reduceCapacity(plantPowerRequested);    // Reduce the plant's avaiable capacity
-    // pCurLine->reduceCapacity(powerRequested);           // Reduce the avaiable capacity of the line
+    area.addCapacity(plantPowerRequested);                   // Add the power capacity to the area
+    pCurPlant->reduceCapacity(powerRequested);    // Reduce the plant's avaiable capacity
+    pCurLine->reduceCapacity(plantPowerRequested);           // Reduce the avaiable capacity of the line
 }
 

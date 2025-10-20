@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include "../header/GridDef.h"
 #include "../header/Plant.h"
 
@@ -13,37 +13,27 @@
 // reduceCapacity() - reduces available capacity of a plant 
 //
 void PowerPlant::reduceCapacity(double amount) {
-    assert(amount <= currentOutput);
-    if (amount <= currentOutput) {
-        currentOutput -= amount;
+    //assert(amount <= availableCapacity);
+    if (amount <= availableCapacity) {
+        availableCapacity -= amount; // Reduces the available output or capacity
     }
 }
 
 //
 // getCapacityAllocated()  -  Returns power capacity already allocated to areas
 //
-// double  PowerPlant::getCapacityAllocated() const { 
-// //???
-// }  
+double PowerPlant::getCapacityAllocated() const { 
+    return currentOutput - availableCapacity;
+}
 
 
 //
 // getCostOfAllocated()  -  Returns cost of the power to allocated to areas
 //
-// double  PowerPlant::getCostOfAllocatedPower() const {
-// //???
-// }  
+double  PowerPlant::getCostOfAllocatedPower() const {
+    return getCapacityAllocated() * operatingCost;
+}
 
-// Debug and Print functions
-// void PowerPlant::printAll() const {
-//     cout << this <<
-//         "  Plant: " <<
-//         setw(14) << left << plantName <<
-//         setw(12) << left << type <<
-//         setw(10) << right << maxPowerOutput << "mw" <<
-//         setw(10) << right << currentOutput << "mw" <<
-//         ",  " << getCurrentCondition() << endl;
-// }
 
 
 //******************************************************
@@ -55,21 +45,21 @@ void PowerPlant::reduceCapacity(double amount) {
 //
 double SolarFarm::calculateOutput() {
     // Calculate and set the current output of this plant
-    double output = numAcres * sunlightHours / 55;
-    currentOutput = output;
-    return output;
+    currentOutput = numAcres * sunlightHours / 55;
+    availableCapacity = currentOutput;
+    return currentOutput;
 }
 
 
 //
 // getCurCondtions():  Returns the current conditons at the plant
 // 
-// string SolarFarm::getCurrentCondition() const {
-//     stringstream oss;
-//     oss << "Number of Acres: " << numAcres <<
-//         ", Sunlight: " << sunlightHours << " Hrs";
-//     return oss.str();
-// }
+string SolarFarm::getCurrentCondition() const {
+    stringstream oss;
+    oss << "Number of Acres: " << numAcres <<
+        ", Sunlight: " << sunlightHours << " Hrs";
+    return oss.str();
+}
 
 
 
@@ -89,8 +79,8 @@ double SolarFarm::calculateOutput() {
 //
 
 double WindFarm::calculateOutput() {
-    double factor = min(avgWindSpeed / 25.0, 1.0); // cap at 1.0
-    currentOutput = maxPowerOutput * factor;
+    currentOutput = turbineCount * avgWindSpeed / 9.8;
+    availableCapacity = currentOutput;
     return currentOutput;
 }
 
@@ -98,11 +88,13 @@ double WindFarm::calculateOutput() {
 //
 // getCurCondtions():  Returns the current conditions at the plant
 // 
-// string WindFarm::getCurrentCondition() const {
-//     stringstream oss;
-//  //???
-//      return oss.str();
-// }
+string WindFarm::getCurrentCondition() const {
+    stringstream oss;
+    oss << "# Turbines: " << turbineCount
+        << ", Blade Len: " << bladeLength
+        << " ft., Wind: " << avgWindSpeed;
+     return oss.str();
+}
 
 
 //******************************************************
@@ -113,22 +105,21 @@ double WindFarm::calculateOutput() {
 // This adjusts the available capacity of the plant based on the factors unique to this plant
 //
 double HydroPlant::calculateOutput() {
-    // Simplified formula: power proportional to flow * drop
-    double factor = min((inFlowRate * verticalDrop) / 1000.0, 1.0);
-    currentOutput = maxPowerOutput * factor;
+    currentOutput = inFlowRate * verticalDrop / 600;
+    availableCapacity = currentOutput;
     return currentOutput;
 }
 
 //
 // getCurCondtions():  Returns the current conditions at the plant
 // 
-// string HydroPlant::getCurrentCondition() const {
-//     stringstream oss;
-//     oss << std::fixed << std::setprecision(2) <<
-//         "Water Flow: " << inFlowRate << " m3/s"
-//         ", Drop: " << verticalDrop << " m";
-//     return oss.str();
-// }
+string HydroPlant::getCurrentCondition() const {
+    stringstream oss;
+    oss << std::fixed << std::setprecision(2) <<
+        "Water Flow: " << inFlowRate << " m3/s"
+        ", Drop: " << verticalDrop << " m";
+    return oss.str();
+}
 
 
 
@@ -141,20 +132,19 @@ double HydroPlant::calculateOutput() {
 // This adjusts the available capacity of the plant based on the factors unique to this plant
 //
 double NuclearPlant::calculateOutput() {
-    double factor = min(fuelRodsActive / 100.0, 1.0); // max 100 rods
-    currentOutput = maxPowerOutput * factor;
+    currentOutput = fuelRodsActive * 20;
+    availableCapacity = currentOutput;
     return currentOutput;
 }
 
 //
 // getCurCondtions():  Returns the current conditions at the plant
 // 
-// string NuclearPlant::getCurrentCondition() const {
-//     stringstream oss;
-//     oss <<
-//         "Number of fuels rods active: " << fuelRodsActive;
-//     return oss.str();
-// }
+string NuclearPlant::getCurrentCondition() const {
+    stringstream oss;
+    oss << "Number of fuels rods active: " << fuelRodsActive;
+    return oss.str();
+}
 
 
 //******************************************************
@@ -167,15 +157,16 @@ double NuclearPlant::calculateOutput() {
 double GeothermalPlant::calculateOutput() {
     // Stable output, just use max
     currentOutput = maxPowerOutput;
+    availableCapacity = currentOutput;
     return currentOutput;
 }
 
 //
 // getCurCondtions():  Returns the current conditons at the plant
-// 
-// string GeothermalPlant::getCurrentCondition() const {
-//     return "Geothermal conditions normal";
-// }
+//
+string GeothermalPlant::getCurrentCondition() const {
+    return "Geothermal conditions normal";
+}
 
 
 //******************************************************
@@ -186,18 +177,16 @@ double GeothermalPlant::calculateOutput() {
 // This adjusts the available capacity of the plant based on the factors unique to this plant
 //
 double GasPlant::calculateOutput() {
-    double factor = throttlePercent / 100.0;
-    currentOutput = maxPowerOutput * factor;
+    currentOutput = maxPowerOutput * throttlePercent / 100.0;
+    availableCapacity = currentOutput;
     return currentOutput;
 }
 
 //
 // getCurCondtions():  Returns the current conditons at the plant
 // 
-// string GasPlant::getCurrentCondition() const {
-//     stringstream oss;
-// //???
-//     return oss.str();
-// }
-
-
+string GasPlant::getCurrentCondition() const {
+    stringstream oss;
+    oss << "Fuel Type: " << fuelType << ", Throttle open %: " << throttlePercent;
+    return oss.str();
+}

@@ -6,7 +6,7 @@
 // 
 #include "../header/GridDef.h"
 #include "../header/PowerGrid.h"
-#include <assert.h>
+#include <cassert>
 
 using namespace std;
 
@@ -83,8 +83,6 @@ int PowerGrid::readServceAreaData(const string& filename) {
     isDemand.close();
     return 0;
 }
-
-
 
 
 //********************************************************
